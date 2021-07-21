@@ -60,8 +60,12 @@
 #include "gpio.h"
 #include "pwm.h"
 #include "usart.h"
+
+#include"oled.h"
+#include"bmp.h"
 static uint8_t key_mode = 0;
-static uint8_t ducty1 = 0,ducty2 = 0;
+static uint8_t Pepole_temp = 0;
+static uint8_t OLED_Clear_Flag = 0;
 //![Simple GPIO Config]
 int main(void)
 {
@@ -69,20 +73,23 @@ int main(void)
 
 
     MAP_WDT_A_holdTimer();
-   // SystemInit();
+    SystemInit();
     FlashCtl_setWaitState(FLASH_BANK0, 1);
     FlashCtl_setWaitState(FLASH_BANK1, 1);
     MAP_PCM_setCoreVoltageLevel(PCM_VCORE1);
     CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
-    //MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
     /*   初始化        */
     //PWMLED_Init();
     Key_Init();
     GPIO_Init();
-    PWM_Init();
-    USART1_Init();
-    USART2_Init();
+    //PWM_Init();
+    OLED_Pin_Init();
+    OLED_Init();
+    //USART1_Init();
+    //USART2_Init();
+    MAP_SysCtl_enableSRAMBankRetention(SYSCTL_SRAM_BANK1);//Enabling SRAM Bank Retention
     //使能中断
     Interrupt_enableInterrupt(INT_PORT1);
 
@@ -92,35 +99,87 @@ int main(void)
     //MAP_SysCtl_enableSRAMBankRetention(SYSCTL_SRAM_BANK1);
 
     MAP_Interrupt_enableMaster();
+    OLED_Display_On();
+    OLED_Clear();
+    OLED_ShowCHinese(0,0,0);      //全
+    OLED_ShowCHinese(18,0,1);     //国
+    OLED_ShowCHinese(36,0,5);     //电
+    OLED_ShowCHinese(54,0,6);    //子
+    OLED_ShowCHinese(72,0,9);     //竞
+    OLED_ShowCHinese(90,0,10);    //赛
 
     while (1)
     {
 
-        if(key_mode == 1){
+                // delay_ms(5);
 
+                // delay_ms(500);
+
+                // OLED_Clear();
+                // delay_ms(5);
+
+                // OLED_DrawBMP(0,0,128,8,BMP1);  //图片显示
+                // delay_ms(500);
+
+                // OLED_Clear();
+                // delay_ms(5);
+        if(key_mode == 1){
+            if(OLED_Clear_Flag!=1){
+                OLED_Clear_Line(2);
+                OLED_Clear_Line(3);
+                OLED_Clear_Flag=1;
+                OLED_ShowCHinese(0,2,14);    //体
+                OLED_ShowCHinese(18,2,15);   //温
+
+                OLED_ShowString(36,2,":");
+            }
+            OLED_ShowString(54,2,"37.2");
+            if(GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6)==1){
+                GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+                OLED_Clear_Line(4);
+                OLED_Clear_Line(5);
+                OLED_ShowCHinese(0,4,16);    //口
+                OLED_ShowCHinese(18,4,17);   //罩
+                OLED_ShowString(36,2,":");
+                OLED_ShowCHinese(54,4,19);   //
+                OLED_ShowCHinese(72,4,20);   //
+                OLED_ShowCHinese(90,4,21);   //
+            }
+            else if(GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN7)==1){
+                GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+            }
+            else{
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+            }
         }
         else if(key_mode ==2){
-
+            if(OLED_Clear_Flag!=1){
+                OLED_Clear_Line(2);
+                OLED_Clear_Line(3);
+                OLED_Clear_Line(4);
+                OLED_Clear_Line(5);
+                delay_ms(5);
+                OLED_Clear_Flag=1;
+                OLED_ShowCHinese(0,2,22);    //
+                OLED_ShowCHinese(18,2,23);   //
+                OLED_ShowCHinese(36,2,24);   //
+                OLED_ShowCHinese(54,2,25);   //
+                OLED_ShowCHinese(72,2,26);   //
+                OLED_ShowCHinese(90,2,27);   //
+                OLED_ShowCHinese(108,2,28);   //
+            }
         }
         else if(key_mode ==3){
 
-            key_mode = 0;
+            key_mode = 1;
         }
-        if(GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6)==1){
-            GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
-        }
-        else if(GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN7)==1){
-            GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
-        }
-        else{
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
-        }
+
         //MAP_PCM_gotoLPM0();
     }
 }
@@ -141,23 +200,13 @@ void PORT1_IRQHandler(void)
     }
     else if( status & GPIO_PIN4 )
     {
-        ducty1 +=20;
-        ducty2 +=10;
-        if(ducty1 > 100)
-        {
-            ducty1 =0;
-        }
-        if(ducty2 > 100)
-        {
-            ducty2 =0;
-        }
-
-        PWM_Duty(ducty1,ducty2);
+        key_mode --;
     }
     else
     {
 
     }
+    OLED_Clear_Flag=0;
     MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
 }
 

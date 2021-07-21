@@ -15,4 +15,5 @@
 	<templateProperties value="id=gpio_toggle_output_MSP_EXP432P401R_nortos_ccs.projectspec.gpio_toggle_output_MSP_EXP432P401R_nortos_ccs,buildProfile=release,isHybrid=true"/>
 	<origin value="C:\ti\simplelink_msp432p4_sdk_3_40_01_02\examples\nortos\MSP_EXP432P401R\driverlib\gpio_toggle_output\ccs\gpio_toggle_output_MSP_EXP432P401R_nortos_ccs.projectspec"/>
 	<filesToOpen value=""/>
+	<isTargetManual value="false"/>
 </projectOptions>
