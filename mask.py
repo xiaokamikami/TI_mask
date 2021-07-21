@@ -1,16 +1,19 @@
 
 import sensor, image, lcd, time
+from Maix import GPIO
 import KPU as kpu
-
+from fpioa_manager import fm    # 导入库
 color_R = (255, 0, 0)
 color_G = (0, 255, 0)
 color_B = (0, 0, 255)
 
 
 class_IDs = ['no_mask', 'mask']
+fm.register(3, fm.fpioa.GPIO1) # unmask
+fm.register(10, fm.fpioa.GPIO2) # mask
 
-umask = GPIO(11,GPIO.OUT_PP , GPIO.PULL_UP,0)
-mask = GPIO(10, GPIO.OUT_PP , GPIO.PULL_UP, 0)
+umask = GPIO(GPIO.GPIO1,GPIO.OUT )
+mask = GPIO(GPIO.GPIO2, GPIO.OUT )
 mask.value(0)
 umask.value(0)
 def drawConfidenceText(image, rol, classid, value):
@@ -25,7 +28,7 @@ def drawConfidenceText(image, rol, classid, value):
     image.draw_string(rol[0], rol[1], text, color=color_R, scale=2.5)
 
 
-class girlfirend:
+
 
 lcd.init()
 sensor.reset(dual_buff=True)
@@ -70,10 +73,10 @@ while (True):
                     mask.value(0)
                     drawConfidenceText(img, (0, 0), 0, confidence)
 
-    _ = lcd.display(img)
+
     else:
         umask.value(0)
         mask.value(0)
-
+    _ = lcd.display(img)
 
 _ = kpu.deinit(task)

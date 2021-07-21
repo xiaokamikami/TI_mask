@@ -66,11 +66,13 @@
 static uint8_t key_mode = 0;
 static uint8_t Pepole_temp = 0;
 static uint8_t OLED_Clear_Flag = 0;
+
 //![Simple GPIO Config]
 int main(void)
 {
     volatile uint32_t ii;
-
+    static uint8_t OLED_Show_Flag1 = 0;
+    static uint8_t OLED_Show_Flag2 = 0;
 
     MAP_WDT_A_holdTimer();
     SystemInit();
@@ -138,24 +140,46 @@ int main(void)
                 GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
-                OLED_Clear_Line(4);
-                OLED_Clear_Line(5);
-                OLED_ShowCHinese(0,4,16);    //©з
-                OLED_ShowCHinese(18,4,17);   //уж
-                OLED_ShowString(36,2,":");
-                OLED_ShowCHinese(54,4,19);   //
-                OLED_ShowCHinese(72,4,20);   //
-                OLED_ShowCHinese(90,4,21);   //
+                if(OLED_Show_Flag1 !=1){
+                    OLED_Clear_Line(4);
+                    OLED_Clear_Line(5);
+                    OLED_ShowCHinese(0,4,16);    //©з
+                    OLED_ShowCHinese(18,4,17);   //уж
+                    OLED_ShowString(36,2,":");
+                    OLED_ShowCHinese(54,4,19);   //
+                    OLED_ShowCHinese(72,4,20);   //
+                    OLED_ShowCHinese(90,4,21);   //
+                    OLED_Show_Flag1 =1;
+                    OLED_Show_Flag2 =0;
+                }
+
             }
             else if(GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN7)==1){
                 GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+                if(OLED_Show_Flag2 !=1){
+                    OLED_Clear_Line(4);
+                    OLED_Clear_Line(5);
+                    OLED_ShowCHinese(0,4,16);    //©з
+                    OLED_ShowCHinese(18,4,17);   //уж
+                    OLED_ShowString(36,2,":");
+                    OLED_ShowCHinese(54,4,18);   //
+                    OLED_ShowCHinese(72,4,20);   //
+                    OLED_ShowCHinese(90,4,21);   //
+                    OLED_Show_Flag2 =1;
+                    OLED_Show_Flag1 =0;
+                }
+
             }
             else{
+                OLED_Clear_Line(4);
+                OLED_Clear_Line(5);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
                 GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+                OLED_Show_Flag1 = 0;
+                OLED_Show_Flag2 = 0;
             }
         }
         else if(key_mode ==2){
@@ -175,10 +199,7 @@ int main(void)
                 OLED_ShowCHinese(108,2,28);   //
             }
         }
-        else if(key_mode ==3){
 
-            key_mode = 1;
-        }
 
         //MAP_PCM_gotoLPM0();
     }
@@ -200,7 +221,7 @@ void PORT1_IRQHandler(void)
     }
     else if( status & GPIO_PIN4 )
     {
-        key_mode --;
+        key_mode =1;
     }
     else
     {
