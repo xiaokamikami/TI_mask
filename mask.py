@@ -9,6 +9,7 @@ color_B = (0, 0, 255)
 
 
 class_IDs = ['no_mask', 'mask']
+#class_IDs = ['mask', 'unmask']
 fm.register(3, fm.fpioa.GPIO1) # unmask
 fm.register(10, fm.fpioa.GPIO2) # mask
 
@@ -42,7 +43,7 @@ sensor.run(1)
 
 task = kpu.load(0x300000)
 
-
+#anchor = (0.4929, 0.8741, 0.9821, 1.5277, 2.1476, 2.1129, 2.8415, 3.3253, 4.2735, 3.4473)
 anchor = (0.1606, 0.3562, 0.4712, 0.9568, 0.9877, 1.9108, 1.8761, 3.5310, 3.4423, 5.6823)
 _ = kpu.init_yolo2(task, 0.5, 0.3, 5, anchor)
 img_lcd = image.Image()
@@ -60,7 +61,7 @@ while (True):
             itemROL = item.rect()
             classID = int(item.classid())
 
-            if classID == 1 and confidence > 0.65:
+            if classID == 1 and confidence > 0.5:
                 _ = img.draw_rectangle(itemROL, color_G, tickness=5)
                 if totalRes == 1:
                     mask.value(1)
@@ -72,7 +73,7 @@ while (True):
                     umask.value(1)
                     mask.value(0)
                     drawConfidenceText(img, (0, 0), 0, confidence)
-
+            time.sleep_ms(100)
 
     else:
         umask.value(0)
